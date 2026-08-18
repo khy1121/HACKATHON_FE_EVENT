@@ -533,6 +533,25 @@
         to { transform: translateX(-45%); }
       }
 
+      /* 창밖 실사 — 천천히 흐르는 켄번즈가 비행을 만든다 */
+      .scene-photo {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0;
+        transition: opacity 0.8s ease;
+        animation: kenburns 14s ease-in-out infinite alternate;
+      }
+
+      .scene-photo.show { opacity: 1; }
+
+      @keyframes kenburns {
+        from { transform: scale(1.04) translate(1.5%, -1%); }
+        to { transform: scale(1.14) translate(-1.5%, 1.5%); }
+      }
+
       .scene-art {
         position: absolute;
         inset: 0;
@@ -932,6 +951,7 @@
             <span class="window-wall">
               <span class="window" id="window">
                 <span class="sky" id="sky"></span>
+                <img class="scene-photo" id="scenePhoto" alt="" aria-hidden="true" />
                 <span class="clouds c1" aria-hidden="true"></span>
                 <span class="clouds c2" aria-hidden="true"></span>
                 <span class="scene-art" id="sceneArt" aria-hidden="true"></span>
@@ -1068,8 +1088,9 @@
           title: '서울의 불빛이 멀어집니다',
           copy: '1976년을 향한 비행 — 활주로의 불빛이 창 아래로 가라앉습니다',
           sky: 'linear-gradient(180deg, #0e1630 0%, #241a33 55%, #41210b 100%)',
-          cloud: 0.35,
-          art: '<svg viewBox="0 0 176 110"><g fill="#150a04"><rect x="6" y="72" width="12" height="38"/><rect x="22" y="62" width="9" height="48"/><rect x="35" y="78" width="14" height="32"/><rect x="53" y="68" width="10" height="42"/><polygon points="70,110 76,48 82,110"/><rect x="88" y="74" width="11" height="36"/><rect x="103" y="64" width="15" height="46"/><rect x="122" y="80" width="12" height="30"/><rect x="138" y="70" width="10" height="40"/><rect x="152" y="82" width="14" height="28"/></g><g fill="#fff7d5"><rect x="24" y="66" width="2" height="2" opacity="0.8"/><rect x="56" y="72" width="2" height="2" opacity="0.7"/><rect x="106" y="68" width="2" height="2" opacity="0.75"/><rect x="141" y="74" width="2" height="2" opacity="0.7"/></g><g fill="#c07346" opacity="0.9"><rect x="20" y="104" width="4" height="2"/><rect x="44" y="104" width="4" height="2"/><rect x="68" y="104" width="4" height="2"/><rect x="92" y="104" width="4" height="2"/><rect x="116" y="104" width="4" height="2"/><rect x="140" y="104" width="4" height="2"/></g></svg>'
+          photo: './assets/scene-takeoff.jpg',
+          cloud: 0,
+          art: ''
         },
         {
           sign: 'CRUISING · 37,000 FT',
@@ -1077,8 +1098,9 @@
           title: '구름바다 위의 순항',
           copy: '반세기의 이야기를 싣고 — 하늘은 조용히 뮌헨 쪽으로 기웁니다',
           sky: 'linear-gradient(180deg, #7d95b3 0%, #b39a79 62%, #6b4324 120%)',
-          cloud: 1,
-          art: '<svg viewBox="0 0 176 110"><g fill="#fff7d5"><ellipse cx="36" cy="92" rx="40" ry="12" opacity="0.5"/><ellipse cx="120" cy="100" rx="52" ry="14" opacity="0.55"/><ellipse cx="86" cy="82" rx="28" ry="9" opacity="0.4"/><ellipse cx="150" cy="80" rx="22" ry="7" opacity="0.35"/></g></svg>'
+          photo: './assets/scene-cruise.jpg',
+          cloud: 0.25,
+          art: ''
         },
         {
           sign: 'APPROACH · MUC AIRSPACE',
@@ -1086,8 +1108,9 @@
           title: '뮌헨 상공에 들어섭니다',
           copy: '노을 아래로 첨탑의 도시가 떠오릅니다 — 착륙을 준비해 주세요',
           sky: 'linear-gradient(180deg, #3a2312 0%, #8a4a26 55%, #d99257 120%)',
-          cloud: 0.5,
-          art: '<svg viewBox="0 0 176 110"><g fill="#241006" opacity="0.9"><rect x="14" y="84" width="10" height="26"/><rect x="30" y="78" width="8" height="32"/><rect x="44" y="88" width="12" height="22"/><rect x="62" y="70" width="9" height="14"/><circle cx="66.5" cy="68" r="5"/><rect x="76" y="70" width="9" height="14"/><circle cx="80.5" cy="68" r="5"/><rect x="62" y="84" width="23" height="26"/><polygon points="98,110 102,62 106,110"/><rect x="112" y="82" width="12" height="28"/><rect x="130" y="76" width="9" height="34"/><rect x="145" y="86" width="14" height="24"/></g></svg>'
+          photo: './assets/scene-munich.jpg',
+          cloud: 0,
+          art: ''
         },
         {
           sign: 'LANDED · MÜNCHEN',
@@ -1095,8 +1118,9 @@
           title: '모든 것이 시작된 도시',
           copy: '착륙했습니다 — 데이비드 보위가 떠돌던 밤의 도시, 하나의 이름이 태어난 곳',
           sky: 'linear-gradient(180deg, #2b1408 0%, #6b3a1a 50%, #c07346 125%)',
-          cloud: 0.15,
-          art: '<svg viewBox="0 0 176 110"><g fill="#150a04"><rect x="8" y="74" width="14" height="36"/><rect x="26" y="66" width="10" height="44"/><rect x="52" y="58" width="11" height="18"/><circle cx="57.5" cy="55" r="6.5"/><rect x="68" y="58" width="11" height="18"/><circle cx="73.5" cy="55" r="6.5"/><rect x="52" y="76" width="27" height="34"/><rect x="88" y="70" width="12" height="40"/><polygon points="108,110 113,52 118,110"/><rect x="126" y="78" width="11" height="32"/><rect x="142" y="68" width="12" height="42"/></g><g fill="#fff7d5"><rect x="29" y="70" width="2" height="3" opacity="0.8"/><rect x="91" y="74" width="2" height="3" opacity="0.7"/><rect x="145" y="72" width="2" height="3" opacity="0.75"/></g></svg>'
+          photo: './assets/scene-arrival.jpg',
+          cloud: 0,
+          art: ''
         },
         {
           sign: 'IMMIGRATION · WILLKOMMEN',
@@ -1112,6 +1136,11 @@
 
       let sceneIndex = 0;
       let sceneTimer = 0;
+
+      /* 다음 장의 사진을 미리 받아 둔다 */
+      SCENES.forEach((sc) => {
+        if (sc.photo) { const im = new Image(); im.src = sc.photo; }
+      });
 
       const skyEl = document.getElementById('sky');
       const artEl = document.getElementById('sceneArt');
@@ -1129,10 +1158,17 @@
       function renderScene(i, instant) {
         sceneIndex = Math.max(0, Math.min(SCENES.length - 1, i));
         const sc = SCENES[sceneIndex];
+        const photoEl = document.getElementById('scenePhoto');
         const apply = () => {
           skyEl.style.background = sc.sky;
           cloudEls.forEach((c) => c.style.setProperty('--cop', sc.cloud));
           artEl.innerHTML = sc.art;
+          if (sc.photo) {
+            photoEl.src = sc.photo;
+            photoEl.classList.add('show');
+          } else {
+            photoEl.classList.remove('show');
+          }
           document.getElementById('cabinSign').textContent = sc.sign;
           document.getElementById('chapterYear').textContent = sc.year;
           document.getElementById('chapterTitle').textContent = sc.title;
