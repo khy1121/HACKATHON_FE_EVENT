@@ -115,6 +115,15 @@
         100% { opacity: 0; transform: translateY(-14vh) translateX(var(--sway, 12px)) scale(1); }
       }
 
+      /* 가장자리 비네트 — 라운지 조명의 어둑함 */
+      .vignette {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        box-shadow: inset 0 0 18vmin 4vmin rgba(16, 7, 2, 0.65);
+      }
+
       .stage {
         position: relative;
         z-index: 1;
@@ -245,7 +254,7 @@
         position: relative;
         width: 100%;
         /* 뒷면(항로·그리드·코드·바코드)이 다 서야 하는 높이 */
-        min-height: 416px;
+        min-height: 478px;
         border: 0;
         border-radius: 16px;
         background: transparent;
@@ -257,7 +266,7 @@
         will-change: transform;
       }
 
-      .stage.open .ticket { transform: rotateY(180deg) !important; cursor: default; }
+      .stage.open .ticket { transform: none !important; cursor: default; }
 
       .face {
         position: absolute;
@@ -274,36 +283,80 @@
         -webkit-backface-visibility: hidden;
       }
 
-      /* 앞면 — 봉인된 초대장 */
-      .front {
+      /* 앞면 — 봉인된 편지. 두 쪽이 겹쳐 한 장처럼 보이고, 당기면
+         지그재그 찢김선을 따라 봉인째 갈라진다. */
+      .front { z-index: 2; padding: 0; overflow: visible; }
+
+      .half {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 13px;
+        padding: 28px 22px;
         border: 1px solid rgba(226, 197, 176, 0.4);
+        border-radius: 16px;
         background:
           radial-gradient(95% 80% at 50% 12%, var(--cognac-4) 0%, var(--cognac-3) 58%, var(--cognac-2) 100%);
-        box-shadow: 0 24px 50px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 247, 213, 0.18);
+        box-shadow:
+          0 0 0 1px rgba(226, 197, 176, 0.22),
+          0 24px 50px rgba(0, 0, 0, 0.55),
+          inset 0 1px 0 rgba(255, 247, 213, 0.18);
+        will-change: transform, clip-path;
+      }
+
+      /* 왼쪽 조각 — 오른쪽 가장자리가 찢김선 */
+      .hl {
+        clip-path: polygon(0 0, 50.6% 0, 48.8% 7%, 51.6% 15%, 48.8% 23%, 51.4% 31%, 49% 39%, 51.6% 47%, 48.8% 55%, 51.4% 63%, 49% 71%, 51.6% 79%, 48.9% 87%, 51.2% 94%, 49.6% 100%, 0 100%);
+        transform:
+          translate(calc(var(--tear, 0) * -16px), calc(var(--tear, 0) * 3px))
+          rotate(calc(var(--tear, 0) * -2.6deg));
+      }
+
+      /* 오른쪽 조각 — 왼쪽 가장자리가 같은 찢김선 */
+      .hr {
+        clip-path: polygon(50.6% 0, 100% 0, 100% 100%, 49.6% 100%, 51.2% 94%, 48.9% 87%, 51.6% 79%, 49% 71%, 51.4% 63%, 48.8% 55%, 51.6% 47%, 49% 39%, 51.4% 31%, 48.8% 23%, 51.6% 15%, 48.8% 7%);
+        transform:
+          translate(calc(var(--tear, 0) * 16px), calc(var(--tear, 0) * 3px))
+          rotate(calc(var(--tear, 0) * 2.6deg));
       }
 
       /* 홀로그램 광택 — 틸트를 따라 흐른다 */
-      .front::before {
+      .half::before {
         position: absolute;
         inset: 0;
         content: '';
         pointer-events: none;
+        border-radius: 16px;
         background: radial-gradient(
           220px 180px at var(--gx, 50%) var(--gy, 30%),
           rgba(255, 247, 213, 0.16),
           transparent 70%
         );
-        transition: opacity 0.3s;
       }
 
       /* 모서리 금선 프레임 */
-      .front::after {
+      .half::after {
         position: absolute;
         inset: 9px;
         content: '';
         pointer-events: none;
         border: 1px solid rgba(226, 197, 176, 0.28);
         border-radius: 10px;
+      }
+
+      /* 완전히 찢기면 두 조각이 양쪽으로 날아간다 */
+      .stage.open .hl { animation: tearL 0.7s cubic-bezier(0.3, 0, 0.7, 0.4) forwards; }
+      .stage.open .hr { animation: tearR 0.7s cubic-bezier(0.3, 0, 0.7, 0.4) forwards; }
+
+      @keyframes tearL {
+        to { opacity: 0; transform: translate(-120%, 14%) rotate(-15deg); }
+      }
+
+      @keyframes tearR {
+        to { opacity: 0; transform: translate(120%, 14%) rotate(15deg); }
       }
 
       .front-eyebrow {
@@ -357,6 +410,9 @@
       .front-hint { color: var(--champagne); font-size: 12.5px; line-height: 20px; }
 
       .cue {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
         color: var(--cream);
         font-family: var(--mono);
         font-size: 11px;
@@ -364,16 +420,215 @@
         animation: pulse 1.8s ease-in-out infinite;
       }
 
+      .cue::before, .cue::after {
+        font-size: 13px;
+        color: var(--champagne);
+      }
+
+      .cue::before { content: '‹'; animation: tugL 1.8s ease-in-out infinite; }
+      .cue::after { content: '›'; animation: tugR 1.8s ease-in-out infinite; }
+
+      @keyframes tugL { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(-5px); } }
+      @keyframes tugR { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
+
       @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
 
       /* 뒷면 — 퍼스트클래스 티켓 */
       .back {
-        justify-content: flex-start;
-        border-top: 6px solid var(--brand);
-        background: var(--canvas);
-        box-shadow: 0 24px 50px rgba(0, 0, 0, 0.55);
-        color: var(--ink);
-        transform: rotateY(180deg);
+        z-index: 1;
+        justify-content: center;
+        gap: 14px;
+        visibility: hidden;
+        opacity: 0;
+        /* 기내 벽 — 코냑 가죽 패널 */
+        background:
+          radial-gradient(120% 90% at 50% 0%, #4a2a12 0%, var(--cognac-3) 45%, var(--cognac-2) 100%);
+        box-shadow:
+          0 0 0 1px rgba(226, 197, 176, 0.3),
+          0 24px 50px rgba(0, 0, 0, 0.55),
+          inset 0 1px 0 rgba(255, 247, 213, 0.14);
+        color: var(--canvas);
+        transform: scale(0.94) translateY(10px);
+        transition: opacity 0.55s ease 0.3s, transform 0.55s cubic-bezier(0.2, 0.8, 0.3, 1) 0.3s, visibility 0s 0.3s;
+      }
+
+      .stage.open .back { visibility: visible; opacity: 1; transform: none; }
+
+      /* 기내 안내등 */
+      .cabin-sign {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        color: var(--champagne);
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 0.24em;
+      }
+
+      .sign-dot {
+        width: 6px;
+        height: 6px;
+        flex: none;
+        border-radius: 50%;
+        background: var(--brand);
+        box-shadow: 0 0 8px var(--brand);
+        animation: pulse 2.2s ease-in-out infinite;
+      }
+
+      /* ── 기내 창문 ── */
+      .window-wall {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px;
+        border-radius: 42% 42% 44% 44% / 34% 34% 36% 36%;
+        background: linear-gradient(160deg, #3a1f0d, #241006);
+        box-shadow:
+          inset 0 2px 4px rgba(255, 247, 213, 0.12),
+          inset 0 -3px 8px rgba(0, 0, 0, 0.5),
+          0 6px 18px rgba(0, 0, 0, 0.35);
+      }
+
+      .window {
+        position: relative;
+        width: 176px;
+        height: 210px;
+        overflow: hidden;
+        border-radius: 40% 40% 42% 42% / 32% 32% 34% 34%;
+        cursor: grab;
+        touch-action: pan-y;
+      }
+
+      .window:active { cursor: grabbing; }
+
+      .sky {
+        position: absolute;
+        inset: 0;
+        background: var(--sky, linear-gradient(180deg, #10182e 0%, #2b1a2e 55%, #41210b 100%));
+        transition: background 0.9s ease;
+      }
+
+      /* 흐르는 구름 두 겹 — 시차가 비행을 만든다 */
+      .clouds {
+        position: absolute;
+        inset: -20% -120% -20% -20%;
+        opacity: var(--cop, 0.9);
+        background:
+          radial-gradient(60px 22px at 15% 30%, rgba(255, 247, 213, 0.16), transparent 70%),
+          radial-gradient(90px 30px at 45% 62%, rgba(255, 247, 213, 0.12), transparent 70%),
+          radial-gradient(70px 24px at 78% 40%, rgba(255, 247, 213, 0.14), transparent 70%);
+        transition: opacity 0.9s ease;
+        animation: cloudflow var(--cdur, 16s) linear infinite;
+      }
+
+      .clouds.c2 {
+        --cdur: 9s;
+        background:
+          radial-gradient(50px 16px at 25% 75%, rgba(255, 247, 213, 0.2), transparent 70%),
+          radial-gradient(70px 20px at 65% 22%, rgba(255, 247, 213, 0.15), transparent 70%);
+      }
+
+      @keyframes cloudflow {
+        from { transform: translateX(0); }
+        to { transform: translateX(-45%); }
+      }
+
+      .scene-art {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        opacity: 0.95;
+        transition: opacity 0.5s ease;
+      }
+
+      .scene-art svg { display: block; width: 100%; height: auto; }
+
+      .glass {
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(115deg, transparent 42%, rgba(255, 247, 213, 0.1) 50%, transparent 58%),
+          radial-gradient(120% 60% at 50% 118%, rgba(26, 11, 4, 0.55), transparent 60%);
+      }
+
+      .window-frame {
+        position: absolute;
+        inset: 0;
+        border: 3px solid rgba(226, 197, 176, 0.28);
+        border-radius: inherit;
+        box-shadow: inset 0 0 22px rgba(0, 0, 0, 0.55);
+      }
+
+      /* ── 챕터 텍스트 ── */
+      .chapter {
+        display: flex;
+        min-height: 104px;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        padding: 0 10px;
+        transition: opacity 0.35s ease, transform 0.35s ease;
+      }
+
+      .chapter.fading { opacity: 0; transform: translateY(6px); }
+
+      .chapter-year {
+        color: var(--brand);
+        font-family: var(--mono);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.28em;
+      }
+
+      .chapter-title {
+        font-family: var(--serif);
+        font-size: 20px;
+        font-style: italic;
+        line-height: 1.3;
+        background: var(--foil);
+        background-size: 220% 100%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .chapter-copy {
+        color: var(--champagne);
+        font-size: 12px;
+        line-height: 19px;
+      }
+
+      /* 여정 진행 점 — 지나온 하늘은 남는다 */
+      .dots { display: flex; gap: 7px; }
+
+      .dot {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: rgba(226, 197, 176, 0.3);
+        transition: background 0.3s, transform 0.3s;
+      }
+
+      .dot.past { background: rgba(226, 197, 176, 0.6); }
+      .dot.on { background: var(--cream); transform: scale(1.35); }
+
+      .boarding-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 7px 14px;
+        border: 1px solid rgba(226, 197, 176, 0.3);
+        border-radius: 999px;
+        background: rgba(26, 11, 4, 0.5);
+      }
+
+      .chip-label {
+        color: rgba(226, 197, 176, 0.7);
+        font-size: 9px;
+        font-weight: 600;
+        letter-spacing: 0.2em;
       }
 
       /* 절취 노치 */
@@ -439,9 +694,10 @@
       .code-label { color: var(--muted); font-size: 10px; font-weight: 600; letter-spacing: 0.2em; }
 
       .code {
-        min-height: 24px;
+        min-height: 18px;
+        color: var(--cream);
         font-family: var(--mono);
-        font-size: 17px;
+        font-size: 13px;
         font-weight: 600;
         letter-spacing: 0.08em;
         overflow-wrap: anywhere;
@@ -462,25 +718,26 @@
       .barcode { width: 132px; height: auto; opacity: 0.85; }
       .ticket-logo { width: 44px; height: auto; }
 
-      /* 개봉 승인 스탬프 — 플립이 끝나면 쾅 내려찍힌다 */
+      /* 입국 스탬프 — 마지막 장(뮌헨 입국)에서 창 위에 쾅 내려찍힌다 */
       .stamp {
         position: absolute;
-        right: 8px;
-        bottom: 52px;
-        width: 92px;
+        left: 50%;
+        top: 50%;
+        width: 104px;
+        margin: -52px 0 0 -52px;
         opacity: 0;
         transform: scale(2.4) rotate(-24deg);
         pointer-events: none;
       }
 
-      .stage.open .stamp {
-        animation: stamp 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) 1.15s forwards;
+      .window.stamped .stamp {
+        animation: stamp 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) 0.5s forwards;
       }
 
       @keyframes stamp {
         0% { opacity: 0; transform: scale(2.4) rotate(-24deg); }
         60% { opacity: 1; transform: scale(0.94) rotate(-13deg); }
-        100% { opacity: 0.92; transform: scale(1) rotate(-14deg); }
+        100% { opacity: 0.94; transform: scale(1) rotate(-14deg); }
       }
 
       /* ── 개봉 파티클 ── */
@@ -516,10 +773,13 @@
         width: 100%;
         align-items: center;
         gap: 12px;
-        padding: 13px 16px;
+        padding: 14px 16px;
         border: 1px solid rgba(226, 197, 176, 0.3);
-        border-radius: 10px;
-        background: rgba(32, 13, 7, 0.55);
+        border-radius: 12px;
+        background: rgba(32, 13, 7, 0.5);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
         text-align: left;
       }
 
@@ -600,24 +860,35 @@
 
         .lede { font-size: 15px; line-height: 24px; }
 
-        .ticket { min-height: 440px; }
+        .ticket { min-height: 492px; }
 
         .after { align-items: flex-start; }
 
         .cta { max-width: 320px; }
       }
 
+      /* 좁은 화면 — 라운지의 호흡을 유지한 채 밀도만 조인다 */
+      @media (max-width: 400px) {
+        .stage { gap: 22px; }
+        .headline { font-size: clamp(28px, 8.6vw, 34px); }
+        .lede { font-size: 13.5px; }
+        .ticket { min-height: 470px; }
+        .crest { width: 50px; height: 50px; }
+      }
+
       @media (prefers-reduced-motion: reduce) {
         *, *::before, *::after { animation: none !important; transition: none !important; }
         .rise, .after > * { opacity: 1; transform: none; }
         .crest circle, .crest path { stroke-dashoffset: 0; }
-        .stage.open .seal { opacity: 0; }
+        .stage.open .hl, .stage.open .hr { opacity: 0; }
+        .stage.open .back { visibility: visible; opacity: 1; transform: none; }
         .stage.open .stamp { opacity: 0.92; transform: scale(1) rotate(-14deg); }
         .plane { left: calc(50% - 7px); }
       }
     </style>
   </head>
   <body>
+    <div class="vignette" aria-hidden="true"></div>
     <main class="stage" id="stage">
       <header class="rise" style="--at: 0.05s">
         <svg class="crest" viewBox="0 0 58 58" aria-hidden="true">
@@ -628,53 +899,67 @@
 
       <div class="rise" style="--at: 0.25s">
         <div class="board" id="board" aria-label="HIDDEN CALL"></div>
-        <p class="board-label">MCM Air · First Class</p>
+        <p class="board-label">MCM AIR 1976 · ICN → MUC</p>
       </div>
 
-      <h1 class="headline rise" style="--at: 0.45s">숨은 탑승권이<br />도착했습니다</h1>
-      <p class="lede rise" style="--at: 0.6s">티켓의 QR을 따라 이곳까지 오셨군요.<br />오늘의 숨겨진 좌석은 단 한 번만 열립니다.</p>
+      <h1 class="headline rise" style="--at: 0.45s">뮌헨으로 향하는<br />50년의 비행</h1>
+      <p class="lede rise" style="--at: 0.6s">티켓의 QR로 체크인이 끝났습니다.<br />봉인을 찢고 탑승해 주세요.</p>
 
       <div class="hand rise" style="--at: 0.78s">
         <button class="ticket" id="ticket" type="button" aria-expanded="false">
           <span class="face front">
-            <span class="front-eyebrow">SEALED INVITATION</span>
-            <span class="front-title">Hidden<br />First Class</span>
-            <span class="seal" aria-hidden="true">M</span>
-            <span class="front-hint">봉인을 눌러 좌석을 확인하세요</span>
-            <span class="cue">TAP TO BREAK SEAL</span>
+            <span class="half hl">
+              <span class="front-eyebrow">CHECK-IN COMPLETE</span>
+              <span class="front-title">Flight to<br />München</span>
+              <span class="seal" aria-hidden="true">M</span>
+              <span class="front-hint">봉인을 잡고 좌우로 당겨 찢어 주세요</span>
+              <span class="cue">DRAG TO TEAR OPEN</span>
+            </span>
+            <span class="half hr" aria-hidden="true">
+              <span class="front-eyebrow">CHECK-IN COMPLETE</span>
+              <span class="front-title">Flight to<br />München</span>
+              <span class="seal">M</span>
+              <span class="front-hint">봉인을 잡고 좌우로 당겨 찢어 주세요</span>
+              <span class="cue">DRAG TO TEAR OPEN</span>
+            </span>
           </span>
 
           <span class="face back">
-            <span class="back-route" aria-hidden="true">
-              <span class="airport"><span class="code">ICN</span><span class="city">SEOUL</span></span>
-              <span class="path"><img class="plane" src="./assets/plane-route.svg" alt="" /></span>
-              <span class="airport" style="text-align: right"><span class="code">MUC</span><span class="city">MÜNCHEN</span></span>
+            <span class="cabin-sign" aria-hidden="true">
+              <span class="sign-dot"></span> <span id="cabinSign">FASTEN SEATBELT · MCM AIR 1976</span>
             </span>
-            <span class="back-eyebrow">HIDDEN PASSENGER</span>
-            <span class="back-title">축하합니다,<br />히든 탑승객이십니다</span>
-            <span class="grid" aria-hidden="true">
-              <span class="cell"><span class="k">CLASS</span><br /><span class="v">FIRST</span></span>
-              <span class="cell end"><span class="k">GATE</span><br /><span class="v">HAUS 1</span></span>
-              <span class="cell"><span class="k">FLIGHT</span><br /><span class="v">MCM 1976</span></span>
-              <span class="cell end"><span class="k">SEAT</span><br /><span class="v">HIDDEN</span></span>
+
+            <span class="window-wall">
+              <span class="window" id="window">
+                <span class="sky" id="sky"></span>
+                <span class="clouds c1" aria-hidden="true"></span>
+                <span class="clouds c2" aria-hidden="true"></span>
+                <span class="scene-art" id="sceneArt" aria-hidden="true"></span>
+                <span class="glass" aria-hidden="true"></span>
+                <span class="window-frame" aria-hidden="true"></span>
+                <img class="stamp" id="stamp" src="./assets/ticket-stamp.png" alt="" aria-hidden="true" />
+              </span>
             </span>
-            <hr class="tear-line" aria-hidden="true" />
-            <span class="code-label">PASS CODE</span>
-            <span class="code" id="code" aria-live="polite"></span>
-            <span class="stub-row" aria-hidden="true">
-              <img class="barcode" src="./assets/barcode.png" alt="" />
-              <img class="ticket-logo" src="./assets/ticket-logo.png" alt="MCM" />
+
+            <span class="chapter" id="chapter" aria-live="polite">
+              <span class="chapter-year" id="chapterYear"></span>
+              <span class="chapter-title" id="chapterTitle"></span>
+              <span class="chapter-copy" id="chapterCopy"></span>
             </span>
-            <img class="stamp" id="stamp" src="./assets/ticket-stamp.png" alt="" aria-hidden="true" />
-          </span>
-        </button>
+
+            <span class="dots" id="dots" aria-hidden="true"></span>
+
+            <span class="boarding-chip">
+              <span class="chip-label">PASS CODE</span>
+              <span class="code" id="code" aria-live="polite"></span>
+            </span>
+          </button>
       </div>
 
       <div class="after" id="after">
-        <!-- 혜택 문구는 팀 행사 운영에 맞게 자유롭게 바꾸세요. -->
         <div class="benefit">
           <span class="ico" aria-hidden="true">✦</span>
-          <p>매장 데스크에서 이 화면을 보여 주시면 <strong>히든 탑승객 웰컴 기프트</strong>를 드립니다</p>
+          <p>서울에서 뮌헨까지, 50년의 여정에 탑승하셨습니다 — <strong>다음 장은 당신의 비행입니다</strong></p>
         </div>
         <a class="cta" href="https://boardingpass-seven.vercel.app/boarding-pass">
           <span>MCM 비행 이어가기</span>
@@ -691,8 +976,42 @@
       const passParam = new URLSearchParams(location.search).get('pass');
       const passCode = (passParam && passParam.trim()) || 'HIDDEN-GUEST';
 
+      /* 패스 코드 롤업 타이핑 — 캐빈이 자리 잡은 뒤 한 글자씩 */
+      function typeCode() {
+        const box = document.getElementById('code');
+        box.textContent = '';
+        [...passCode].forEach((ch, i) => {
+          const el = document.createElement('span');
+          el.className = 'ch';
+          el.textContent = ch;
+          el.style.animationDelay = reduced ? '0s' : 0.6 + i * 0.05 + 's';
+          box.appendChild(el);
+        });
+      }
+
+      /* 개봉 파티클 — 찢은 자리에서 금빛이 터진다 */
+      function burstFrom(x, y) {
+        if (reduced) return;
+        for (let i = 0; i < 26; i += 1) {
+          const pt = document.createElement('span');
+          pt.className = 'burst';
+          pt.textContent = Math.random() > 0.45 ? '✦' : '·';
+          pt.style.left = x + 'px';
+          pt.style.top = y + 'px';
+          pt.style.fontSize = 8 + Math.random() * 12 + 'px';
+          const angle = Math.random() * Math.PI * 2;
+          const dist = 60 + Math.random() * 130;
+          pt.style.setProperty('--bx', Math.cos(angle) * dist + 'px');
+          pt.style.setProperty('--by', Math.sin(angle) * dist - 40 + 'px');
+          pt.style.setProperty('--br', (Math.random() * 240 - 120).toFixed(0) + 'deg');
+          pt.setAttribute('aria-hidden', 'true');
+          document.body.appendChild(pt);
+          setTimeout(() => pt.remove(), 1200);
+        }
+      }
+
       /* ── split-flap 안내판 — 글자가 한 칸씩 착착 도착한다 ── */
-      const TARGET = 'HIDDEN CALL';
+      const TARGET = 'NOW BOARDING';
       const POOL = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
       const board = document.getElementById('board');
       const flaps = [...TARGET].map((ch) => {
@@ -741,8 +1060,165 @@
       const stage = document.getElementById('stage');
       const ticket = document.getElementById('ticket');
 
+      /* ── 비행 씬 — 이륙에서 입국까지 순서대로 흐른다 ── */
+      const SCENES = [
+        {
+          sign: 'FASTEN SEATBELT · TAKEOFF',
+          year: 'ICN · TAKEOFF',
+          title: '서울의 불빛이 멀어집니다',
+          copy: '1976년을 향한 비행 — 활주로의 불빛이 창 아래로 가라앉습니다',
+          sky: 'linear-gradient(180deg, #0e1630 0%, #241a33 55%, #41210b 100%)',
+          cloud: 0.35,
+          art: '<svg viewBox="0 0 176 110"><g fill="#150a04"><rect x="6" y="72" width="12" height="38"/><rect x="22" y="62" width="9" height="48"/><rect x="35" y="78" width="14" height="32"/><rect x="53" y="68" width="10" height="42"/><polygon points="70,110 76,48 82,110"/><rect x="88" y="74" width="11" height="36"/><rect x="103" y="64" width="15" height="46"/><rect x="122" y="80" width="12" height="30"/><rect x="138" y="70" width="10" height="40"/><rect x="152" y="82" width="14" height="28"/></g><g fill="#fff7d5"><rect x="24" y="66" width="2" height="2" opacity="0.8"/><rect x="56" y="72" width="2" height="2" opacity="0.7"/><rect x="106" y="68" width="2" height="2" opacity="0.75"/><rect x="141" y="74" width="2" height="2" opacity="0.7"/></g><g fill="#c07346" opacity="0.9"><rect x="20" y="104" width="4" height="2"/><rect x="44" y="104" width="4" height="2"/><rect x="68" y="104" width="4" height="2"/><rect x="92" y="104" width="4" height="2"/><rect x="116" y="104" width="4" height="2"/><rect x="140" y="104" width="4" height="2"/></g></svg>'
+        },
+        {
+          sign: 'CRUISING · 37,000 FT',
+          year: '37,000 FT',
+          title: '구름바다 위의 순항',
+          copy: '반세기의 이야기를 싣고 — 하늘은 조용히 뮌헨 쪽으로 기웁니다',
+          sky: 'linear-gradient(180deg, #7d95b3 0%, #b39a79 62%, #6b4324 120%)',
+          cloud: 1,
+          art: '<svg viewBox="0 0 176 110"><g fill="#fff7d5"><ellipse cx="36" cy="92" rx="40" ry="12" opacity="0.5"/><ellipse cx="120" cy="100" rx="52" ry="14" opacity="0.55"/><ellipse cx="86" cy="82" rx="28" ry="9" opacity="0.4"/><ellipse cx="150" cy="80" rx="22" ry="7" opacity="0.35"/></g></svg>'
+        },
+        {
+          sign: 'APPROACH · MUC AIRSPACE',
+          year: 'MUC · APPROACH',
+          title: '뮌헨 상공에 들어섭니다',
+          copy: '노을 아래로 첨탑의 도시가 떠오릅니다 — 착륙을 준비해 주세요',
+          sky: 'linear-gradient(180deg, #3a2312 0%, #8a4a26 55%, #d99257 120%)',
+          cloud: 0.5,
+          art: '<svg viewBox="0 0 176 110"><g fill="#241006" opacity="0.9"><rect x="14" y="84" width="10" height="26"/><rect x="30" y="78" width="8" height="32"/><rect x="44" y="88" width="12" height="22"/><rect x="62" y="70" width="9" height="14"/><circle cx="66.5" cy="68" r="5"/><rect x="76" y="70" width="9" height="14"/><circle cx="80.5" cy="68" r="5"/><rect x="62" y="84" width="23" height="26"/><polygon points="98,110 102,62 106,110"/><rect x="112" y="82" width="12" height="28"/><rect x="130" y="76" width="9" height="34"/><rect x="145" y="86" width="14" height="24"/></g></svg>'
+        },
+        {
+          sign: 'LANDED · MÜNCHEN',
+          year: '1976 · MÜNCHEN',
+          title: '모든 것이 시작된 도시',
+          copy: '착륙했습니다 — 데이비드 보위가 떠돌던 밤의 도시, 하나의 이름이 태어난 곳',
+          sky: 'linear-gradient(180deg, #2b1408 0%, #6b3a1a 50%, #c07346 125%)',
+          cloud: 0.15,
+          art: '<svg viewBox="0 0 176 110"><g fill="#150a04"><rect x="8" y="74" width="14" height="36"/><rect x="26" y="66" width="10" height="44"/><rect x="52" y="58" width="11" height="18"/><circle cx="57.5" cy="55" r="6.5"/><rect x="68" y="58" width="11" height="18"/><circle cx="73.5" cy="55" r="6.5"/><rect x="52" y="76" width="27" height="34"/><rect x="88" y="70" width="12" height="40"/><polygon points="108,110 113,52 118,110"/><rect x="126" y="78" width="11" height="32"/><rect x="142" y="68" width="12" height="42"/></g><g fill="#fff7d5"><rect x="29" y="70" width="2" height="3" opacity="0.8"/><rect x="91" y="74" width="2" height="3" opacity="0.7"/><rect x="145" y="72" width="2" height="3" opacity="0.75"/></g></svg>'
+        },
+        {
+          sign: 'IMMIGRATION · WILLKOMMEN',
+          year: 'WILLKOMMEN',
+          title: '뮌헨 입국이 승인되었습니다',
+          copy: 'MCM의 고향에 도착하셨습니다 — 여권에 오늘의 스탬프가 찍힙니다',
+          sky: 'linear-gradient(180deg, #241006 0%, #41210b 60%, #5a3621 100%)',
+          cloud: 0,
+          art: '<svg viewBox="0 0 176 110"><g fill="none" stroke="#e2c5b0" stroke-width="1.2" opacity="0.55"><path d="M20 96 L60 96 M116 96 L156 96"/><path d="M60 96 L66 84 L110 84 L116 96"/><rect x="74" y="60" width="28" height="24" rx="3"/></g></svg>',
+          final: true
+        }
+      ];
+
+      let sceneIndex = 0;
+      let sceneTimer = 0;
+
+      const skyEl = document.getElementById('sky');
+      const artEl = document.getElementById('sceneArt');
+      const chapterEl = document.getElementById('chapter');
+      const dotsEl = document.getElementById('dots');
+      const windowEl = document.getElementById('window');
+      const cloudEls = document.querySelectorAll('.clouds');
+
+      SCENES.forEach(() => {
+        const d = document.createElement('span');
+        d.className = 'dot';
+        dotsEl.appendChild(d);
+      });
+
+      function renderScene(i, instant) {
+        sceneIndex = Math.max(0, Math.min(SCENES.length - 1, i));
+        const sc = SCENES[sceneIndex];
+        const apply = () => {
+          skyEl.style.background = sc.sky;
+          cloudEls.forEach((c) => c.style.setProperty('--cop', sc.cloud));
+          artEl.innerHTML = sc.art;
+          document.getElementById('cabinSign').textContent = sc.sign;
+          document.getElementById('chapterYear').textContent = sc.year;
+          document.getElementById('chapterTitle').textContent = sc.title;
+          document.getElementById('chapterCopy').textContent = sc.copy;
+          [...dotsEl.children].forEach((d, di) => {
+            d.classList.toggle('on', di === sceneIndex);
+            d.classList.toggle('past', di < sceneIndex);
+          });
+          windowEl.classList.toggle('stamped', Boolean(sc.final));
+          chapterEl.classList.remove('fading');
+          if (sc.final) clearInterval(sceneTimer);
+        };
+        if (instant || reduced) { apply(); return; }
+        chapterEl.classList.add('fading');
+        artEl.style.opacity = '0';
+        setTimeout(() => { apply(); artEl.style.opacity = '0.95'; }, 330);
+      }
+
+      function startFlight() {
+        renderScene(0, true);
+        if (reduced) { renderScene(SCENES.length - 1, true); return; }
+        clearInterval(sceneTimer);
+        sceneTimer = setInterval(() => {
+          if (sceneIndex >= SCENES.length - 1) { clearInterval(sceneTimer); return; }
+          renderScene(sceneIndex + 1);
+        }, 4600);
+      }
+
+      /* 창을 쓸면 앞뒤 장으로 — 손을 대면 자동 진행은 멈춘다 */
+      let winStartX = null;
+      windowEl.addEventListener('pointerdown', (e) => { winStartX = e.clientX; e.stopPropagation(); });
+      windowEl.addEventListener('pointerup', (e) => {
+        if (winStartX == null) return;
+        const dx = e.clientX - winStartX;
+        winStartX = null;
+        e.stopPropagation();
+        if (Math.abs(dx) < 24) return;
+        clearInterval(sceneTimer);
+        renderScene(sceneIndex + (dx < 0 ? 1 : -1));
+      });
+
+      /* ── 찢기 상태기계 — 애니메이터는 하나뿐이라 서로 밟지 않는다 ── */
+      let tearing = false;
+      let tearStartX = 0;
+      let tearProgress = 0;
+      let tearRaf = 0;
+      let lastDragEnd = 0;
+
+      function setTear(v) {
+        tearProgress = Math.max(0, Math.min(1, v));
+        ticket.style.setProperty('--tear', tearProgress.toFixed(3));
+      }
+
+      /* 현재 진행도에서 target까지 잇는다. 새 요청이 오면 이전 것을 끊는다. */
+      function animateTear(target, dur, done) {
+        cancelAnimationFrame(tearRaf);
+        const from = tearProgress;
+        const t0 = performance.now();
+        function step(now) {
+          const k = Math.min(1, (now - t0) / dur);
+          setTear(from + (target - from) * k);
+          if (k < 1) tearRaf = requestAnimationFrame(step);
+          else if (done) done();
+        }
+        tearRaf = requestAnimationFrame(step);
+      }
+
+      function openTicket(x, y) {
+        if (stage.classList.contains('open')) return;
+        cancelAnimationFrame(tearRaf);
+        ticket.style.transform = '';
+        stage.classList.add('open');
+        ticket.setAttribute('aria-expanded', 'true');
+        const r = ticket.getBoundingClientRect();
+        burstFrom(x || r.left + r.width / 2, y || r.top + r.height / 2);
+        typeCode();
+        startFlight();
+      }
+
       ticket.addEventListener('pointermove', (e) => {
         if (reduced || stage.classList.contains('open')) return;
+        if (tearing) {
+          /* 당기는 만큼 찢긴다 — 좌우 어느 쪽이든 */
+          setTear(Math.abs(e.clientX - tearStartX) / 130);
+          return;
+        }
         const r = ticket.getBoundingClientRect();
         const px = (e.clientX - r.left) / r.width;
         const py = (e.clientY - r.top) / r.height;
@@ -752,51 +1228,39 @@
         ticket.style.setProperty('--gy', (py * 100).toFixed(1) + '%');
       });
 
-      ticket.addEventListener('pointerleave', () => {
-        if (!stage.classList.contains('open')) ticket.style.transform = '';
+      ticket.addEventListener('pointerdown', (e) => {
+        if (stage.classList.contains('open')) return;
+        cancelAnimationFrame(tearRaf);
+        tearing = true;
+        tearStartX = e.clientX;
+        ticket.style.transform = '';
+        /* 일부 환경에서 캡처가 거부될 수 있다 — 찢기는 계속돼야 한다 */
+        try { ticket.setPointerCapture(e.pointerId); } catch (err) { /* 무시 */ }
       });
 
-      /* ── 개봉 — 씰 크랙 → 플립 → 파티클 → 코드 롤업 ── */
-      function typeCode() {
-        const box = document.getElementById('code');
-        box.textContent = '';
-        [...passCode].forEach((ch, i) => {
-          const s = document.createElement('span');
-          s.className = 'ch';
-          s.textContent = ch;
-          s.style.animationDelay = reduced ? '0s' : 0.75 + i * 0.055 + 's';
-          box.appendChild(s);
-        });
+      function settleTear(e) {
+        if (!tearing) return;
+        tearing = false;
+        lastDragEnd = performance.now();
+        if (stage.classList.contains('open')) return;
+        if (tearProgress > 0.5) openTicket(e.clientX, e.clientY);
+        else animateTear(0, 200); /* 스프링백 — 도로 붙는다 */
       }
 
-      function burstFrom(x, y) {
-        if (reduced) return;
-        for (let i = 0; i < 26; i += 1) {
-          const p = document.createElement('span');
-          p.className = 'burst';
-          p.textContent = Math.random() > 0.45 ? '✦' : '·';
-          p.style.left = x + 'px';
-          p.style.top = y + 'px';
-          p.style.fontSize = 8 + Math.random() * 12 + 'px';
-          const angle = Math.random() * Math.PI * 2;
-          const dist = 60 + Math.random() * 130;
-          p.style.setProperty('--bx', Math.cos(angle) * dist + 'px');
-          p.style.setProperty('--by', Math.sin(angle) * dist - 40 + 'px');
-          p.style.setProperty('--br', (Math.random() * 240 - 120).toFixed(0) + 'deg');
-          p.setAttribute('aria-hidden', 'true');
-          document.body.appendChild(p);
-          setTimeout(() => p.remove(), 1200);
-        }
-      }
+      ticket.addEventListener('pointerup', settleTear);
+      ticket.addEventListener('pointercancel', settleTear);
 
+      ticket.addEventListener('pointerleave', () => {
+        if (!tearing && !stage.classList.contains('open')) ticket.style.transform = '';
+      });
+
+      /* 탭·키보드(Enter/Space)는 짧은 자동 찢김으로 연다 — 접근성 폴백.
+         방금 끝난 드래그의 잔여 click은 무시한다. */
       ticket.addEventListener('click', (e) => {
         if (stage.classList.contains('open')) return;
-        ticket.style.transform = '';
-        stage.classList.add('open');
-        ticket.setAttribute('aria-expanded', 'true');
-        const r = ticket.getBoundingClientRect();
-        burstFrom(e.clientX || r.left + r.width / 2, e.clientY || r.top + r.height / 2);
-        typeCode();
+        if (performance.now() - lastDragEnd < 450 || tearProgress > 0.05) return;
+        if (reduced) { openTicket(e.clientX, e.clientY); return; }
+        animateTear(1, 320, () => openTicket(e.clientX, e.clientY));
       });
     </script>
   </body>
