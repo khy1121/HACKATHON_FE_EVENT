@@ -6,6 +6,11 @@
     <meta name="theme-color" content="#1a0b04" />
     <meta name="description" content="MCM Boarding Pass 히든 퍼스트클래스 이벤트" />
     <title>MCM HIDDEN FIRST CLASS</title>
+    <meta property="og:title" content="MCM HIDDEN FIRST CLASS" />
+    <meta property="og:description" content="뮌헨으로 향하는 50년의 비행 — 봉인을 찢고 탑승하세요" />
+    <meta property="og:image" content="https://khy1121.github.io/HACKATHON_FE_EVENT/assets/og-cover.jpg" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -122,6 +127,75 @@
         z-index: 0;
         pointer-events: none;
         box-shadow: inset 0 0 18vmin 4vmin rgba(16, 7, 2, 0.65);
+      }
+
+      /* ── 탑승 워크 — 터미널→브리지→복도→좌석으로 걸어 들어간다 ── */
+      .walk {
+        position: fixed;
+        inset: 0;
+        z-index: 40;
+        display: none;
+        background: var(--cognac-0);
+      }
+
+      .walk.on { display: block; }
+
+      .walk-shot {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0;
+        transition: opacity 0.7s ease;
+      }
+
+      .walk-shot.on {
+        opacity: 1;
+        animation: walkin 2.2s ease-out forwards;
+      }
+
+      /* 안으로 걸어 들어가는 줌 */
+      @keyframes walkin {
+        from { transform: scale(1); }
+        to { transform: scale(1.16); }
+      }
+
+      .walk-cap {
+        position: absolute;
+        left: 50%;
+        bottom: max(9vh, 64px);
+        z-index: 2;
+        transform: translateX(-50%);
+        color: var(--cream);
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.3em;
+        text-shadow: 0 2px 12px rgba(16, 7, 2, 0.9);
+        white-space: nowrap;
+      }
+
+      .walk-skip {
+        position: absolute;
+        right: 18px;
+        bottom: max(4vh, 28px);
+        z-index: 2;
+        padding: 8px 14px;
+        border: 1px solid rgba(226, 197, 176, 0.4);
+        border-radius: 999px;
+        background: rgba(26, 11, 4, 0.5);
+        color: var(--champagne);
+        font-family: var(--sans);
+        font-size: 12px;
+        cursor: pointer;
+      }
+
+      .walk::after {
+        position: absolute;
+        inset: 0;
+        content: '';
+        pointer-events: none;
+        box-shadow: inset 0 0 24vmin 6vmin rgba(16, 7, 2, 0.7);
       }
 
       .stage {
@@ -293,12 +367,15 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
+        justify-content: space-between;
         gap: 13px;
-        padding: 28px 22px;
+        padding: 34px 22px 26px;
+        text-shadow: 0 1px 8px rgba(16, 7, 2, 0.8);
         border: 1px solid rgba(226, 197, 176, 0.4);
         border-radius: 16px;
+        /* 실사 봉투 — 왁스 씰이 이미지에 함께 있다 */
         background:
+          url('./assets/envelope-front.jpg') center / cover no-repeat,
           radial-gradient(95% 80% at 50% 12%, var(--cognac-4) 0%, var(--cognac-3) 58%, var(--cognac-2) 100%);
         box-shadow:
           0 0 0 1px rgba(226, 197, 176, 0.22),
@@ -377,6 +454,7 @@
 
       /* 왁스 씰 — 누르면 갈라진다 */
       .seal {
+        visibility: hidden;
         position: relative;
         display: flex;
         width: 74px;
@@ -908,6 +986,15 @@
   </head>
   <body>
     <div class="vignette" aria-hidden="true"></div>
+
+    <div class="walk" id="walk" aria-hidden="true">
+      <img class="walk-shot" src="./assets/walk-terminal.jpg" alt="" />
+      <img class="walk-shot" src="./assets/walk-bridge.jpg" alt="" />
+      <img class="walk-shot" src="./assets/walk-aisle.jpg" alt="" />
+      <img class="walk-shot" src="./assets/walk-seat.jpg" alt="" />
+      <span class="walk-cap" id="walkCap"></span>
+      <button class="walk-skip" id="walkSkip" type="button">건너뛰기</button>
+    </div>
     <main class="stage" id="stage">
       <header class="rise" style="--at: 0.05s">
         <svg class="crest" viewBox="0 0 58 58" aria-hidden="true">
@@ -1128,6 +1215,7 @@
           title: '뮌헨 입국이 승인되었습니다',
           copy: 'MCM의 고향에 도착하셨습니다 — 여권에 오늘의 스탬프가 찍힙니다',
           sky: 'linear-gradient(180deg, #241006 0%, #41210b 60%, #5a3621 100%)',
+          photo: './assets/scene-immigration.jpg',
           cloud: 0,
           art: '<svg viewBox="0 0 176 110"><g fill="none" stroke="#e2c5b0" stroke-width="1.2" opacity="0.55"><path d="M20 96 L60 96 M116 96 L156 96"/><path d="M60 96 L66 84 L110 84 L116 96"/><rect x="74" y="60" width="28" height="24" rx="3"/></g></svg>',
           final: true
@@ -1236,6 +1324,34 @@
         tearRaf = requestAnimationFrame(step);
       }
 
+      /* 탑승 워크 — 터미널→브리지→복도→좌석. 끝나면 기내가 열린다 */
+      const WALK_CAPS = ['CHECK-IN HALL', 'BOARDING BRIDGE', 'FIRST CABIN', 'SEAT 1A'];
+      const walkEl = document.getElementById('walk');
+      const walkShots = [...walkEl.querySelectorAll('.walk-shot')];
+      let walkTimer = 0;
+
+      function endWalk() {
+        clearTimeout(walkTimer);
+        walkEl.classList.remove('on');
+        walkShots.forEach((sh) => sh.classList.remove('on'));
+        typeCode();
+        startFlight();
+      }
+
+      function runWalk() {
+        walkEl.classList.add('on');
+        let i = 0;
+        function step() {
+          walkShots.forEach((sh, si) => sh.classList.toggle('on', si === i));
+          document.getElementById('walkCap').textContent = WALK_CAPS[i];
+          i += 1;
+          walkTimer = setTimeout(i < walkShots.length ? step : endWalk, 2100);
+        }
+        step();
+      }
+
+      document.getElementById('walkSkip').addEventListener('click', endWalk);
+
       function openTicket(x, y) {
         if (stage.classList.contains('open')) return;
         cancelAnimationFrame(tearRaf);
@@ -1244,8 +1360,8 @@
         ticket.setAttribute('aria-expanded', 'true');
         const r = ticket.getBoundingClientRect();
         burstFrom(x || r.left + r.width / 2, y || r.top + r.height / 2);
-        typeCode();
-        startFlight();
+        if (reduced) { typeCode(); startFlight(); return; }
+        runWalk();
       }
 
       ticket.addEventListener('pointermove', (e) => {
