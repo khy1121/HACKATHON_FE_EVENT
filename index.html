@@ -17,6 +17,13 @@
       href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
     />
     <style>
+      /* 메인 앱의 브랜드 워드마크 서체 — MCM BOARDING PASS 헤더와 동일 */
+      @font-face {
+        font-family: 'NeurimboGothic';
+        src: url('./assets/neurimboGothicRegular.otf') format('opentype');
+        font-display: swap;
+      }
+
       /* ────────────────────────────────────────────────────────────────
          MCM HIDDEN FIRST CLASS — 고급 항공사 라운지의 문법으로.
          팔레트는 메인 앱 보딩패스 무대 그대로: 코냑(#200d07~#5a3621),
@@ -56,6 +63,17 @@
         text-align: center;
         overflow-x: hidden;
         -webkit-tap-highlight-color: transparent;
+      }
+
+      /* 메인 앱 보딩패스 무대(43~47) 배경을 그라디언트 위에 은은하게 */
+      body::before {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        content: '';
+        pointer-events: none;
+        opacity: 0.5;
+        background: url('./assets/stage-bg.png') top center / cover no-repeat;
       }
 
       /* 필름 그레인 — 라운지의 어둑한 공기 */
@@ -185,11 +203,11 @@
       }
 
       .board-label {
-        margin-top: 8px;
-        color: var(--brand);
-        font-size: 10px;
-        font-weight: 700;
-        letter-spacing: 0.34em;
+        margin-top: 10px;
+        color: var(--champagne);
+        font-family: 'NeurimboGothic', var(--sans);
+        font-size: 13px;
+        letter-spacing: 0.3em;
         text-transform: uppercase;
       }
 
@@ -226,7 +244,8 @@
       .ticket {
         position: relative;
         width: 100%;
-        min-height: 320px;
+        /* 뒷면(항로·그리드·코드·바코드)이 다 서야 하는 높이 */
+        min-height: 416px;
         border: 0;
         border-radius: 16px;
         background: transparent;
@@ -360,7 +379,7 @@
       /* 절취 노치 */
       .back::before, .back::after {
         position: absolute;
-        top: 63%;
+        top: 66%;
         width: 22px;
         height: 22px;
         content: '';
@@ -387,10 +406,9 @@
 
       .plane {
         position: absolute;
-        top: -7px;
+        top: -8px;
         left: 0;
-        font-size: 13px;
-        color: var(--brand);
+        width: 16px;
         animation: taxi 3.4s ease-in-out infinite;
       }
 
@@ -432,6 +450,38 @@
       .code .ch { display: inline-block; opacity: 0; transform: translateY(6px); animation: chin 0.32s ease forwards; }
 
       @keyframes chin { to { opacity: 1; transform: none; } }
+
+      .stub-row {
+        display: flex;
+        width: 100%;
+        align-items: center;
+        justify-content: space-between;
+        padding: 2px 6px 0;
+      }
+
+      .barcode { width: 132px; height: auto; opacity: 0.85; }
+      .ticket-logo { width: 44px; height: auto; }
+
+      /* 개봉 승인 스탬프 — 플립이 끝나면 쾅 내려찍힌다 */
+      .stamp {
+        position: absolute;
+        right: 8px;
+        bottom: 52px;
+        width: 92px;
+        opacity: 0;
+        transform: scale(2.4) rotate(-24deg);
+        pointer-events: none;
+      }
+
+      .stage.open .stamp {
+        animation: stamp 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) 1.15s forwards;
+      }
+
+      @keyframes stamp {
+        0% { opacity: 0; transform: scale(2.4) rotate(-24deg); }
+        60% { opacity: 1; transform: scale(0.94) rotate(-13deg); }
+        100% { opacity: 0.92; transform: scale(1) rotate(-14deg); }
+      }
 
       /* ── 개봉 파티클 ── */
       .burst {
@@ -514,18 +564,55 @@
         45%, 100% { transform: translateX(120%); }
       }
 
-      .cta .jet { display: inline-block; transition: transform 0.35s ease; }
+      .cta .jet { display: inline-block; width: 16px; transition: transform 0.35s ease; }
       .cta:hover .jet { transform: translate(6px, -4px) rotate(-8deg); }
 
       .note { color: #807066; font-size: 11px; line-height: 18px; }
 
       a:focus-visible, button:focus-visible { outline: 2px solid var(--cream); outline-offset: 3px; }
 
+      /* ── 데스크탑 — 라운지 카운터의 2단 구성: 안내는 왼쪽, 티켓은 손에 ── */
+      @media (min-width: 760px) {
+        .stage {
+          display: grid;
+          max-width: 920px;
+          grid-template-columns: minmax(0, 1fr) 380px;
+          grid-template-rows: auto auto auto auto auto;
+          align-items: start;
+          column-gap: 80px;
+          row-gap: 22px;
+          justify-items: start;
+          text-align: left;
+        }
+
+        .stage > * { grid-column: 1; }
+
+        .hand {
+          grid-column: 2;
+          grid-row: 1 / 6;
+          align-self: center;
+          width: 380px;
+        }
+
+        .board { justify-content: flex-start; }
+
+        .headline { font-size: 48px; line-height: 1.14; }
+
+        .lede { font-size: 15px; line-height: 24px; }
+
+        .ticket { min-height: 440px; }
+
+        .after { align-items: flex-start; }
+
+        .cta { max-width: 320px; }
+      }
+
       @media (prefers-reduced-motion: reduce) {
         *, *::before, *::after { animation: none !important; transition: none !important; }
         .rise, .after > * { opacity: 1; transform: none; }
         .crest circle, .crest path { stroke-dashoffset: 0; }
         .stage.open .seal { opacity: 0; }
+        .stage.open .stamp { opacity: 0.92; transform: scale(1) rotate(-14deg); }
         .plane { left: calc(50% - 7px); }
       }
     </style>
@@ -560,7 +647,7 @@
           <span class="face back">
             <span class="back-route" aria-hidden="true">
               <span class="airport"><span class="code">ICN</span><span class="city">SEOUL</span></span>
-              <span class="path"><span class="plane">✈</span></span>
+              <span class="path"><img class="plane" src="./assets/plane-route.svg" alt="" /></span>
               <span class="airport" style="text-align: right"><span class="code">MUC</span><span class="city">MÜNCHEN</span></span>
             </span>
             <span class="back-eyebrow">HIDDEN PASSENGER</span>
@@ -574,6 +661,11 @@
             <hr class="tear-line" aria-hidden="true" />
             <span class="code-label">PASS CODE</span>
             <span class="code" id="code" aria-live="polite"></span>
+            <span class="stub-row" aria-hidden="true">
+              <img class="barcode" src="./assets/barcode.png" alt="" />
+              <img class="ticket-logo" src="./assets/ticket-logo.png" alt="MCM" />
+            </span>
+            <img class="stamp" id="stamp" src="./assets/ticket-stamp.png" alt="" aria-hidden="true" />
           </span>
         </button>
       </div>
@@ -586,7 +678,7 @@
         </div>
         <a class="cta" href="https://boardingpass-seven.vercel.app/boarding-pass">
           <span>MCM 비행 이어가기</span>
-          <span class="jet" aria-hidden="true">✈</span>
+          <img class="jet" src="./assets/cta-plane.svg" alt="" aria-hidden="true" />
         </a>
         <p class="note">이 행사는 MCM HAUS 매장 기반으로 진행됩니다</p>
       </div>
