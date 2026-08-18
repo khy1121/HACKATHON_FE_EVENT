@@ -3,115 +3,242 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#200d07" />
-    <meta name="description" content="MCM Boarding Pass 히든 탑승객 이벤트" />
-    <title>MCM HIDDEN BOARDING</title>
+    <meta name="theme-color" content="#1a0b04" />
+    <meta name="description" content="MCM Boarding Pass 히든 퍼스트클래스 이벤트" />
+    <title>MCM HIDDEN FIRST CLASS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,500;0,600;1,500&family=IBM+Plex+Mono:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+    />
     <style>
-      /* MCM Boarding Pass 무대의 색만 쓴다 — 새 색을 만들지 않는다.
-         #200d07/#41210b 무대, #fff7d5 크림, #c07346 브랜드 브라운,
-         #e2c5b0 헤더 타이틀, #fafafa 캔버스, #191919 잉크 */
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
+      /* ────────────────────────────────────────────────────────────────
+         MCM HIDDEN FIRST CLASS — 고급 항공사 라운지의 문법으로.
+         팔레트는 메인 앱 보딩패스 무대 그대로: 코냑(#200d07~#5a3621),
+         크림(#fff7d5), 샴페인(#e2c5b0), 브랜드 브라운(#c07346).
+         금박(포일)은 이 세 톤의 그라디언트로만 만든다 — 새 색 없음.
+         ──────────────────────────────────────────────────────────────── */
+      :root {
+        --cognac-0: #1a0b04;
+        --cognac-1: #200d07;
+        --cognac-2: #2b1408;
+        --cognac-3: #41210b;
+        --cognac-4: #5a3621;
+        --brand: #c07346;
+        --cream: #fff7d5;
+        --champagne: #e2c5b0;
+        --canvas: #fafafa;
+        --ink: #191919;
+        --muted: #777;
+        --foil: linear-gradient(105deg, #a8825f 0%, var(--champagne) 28%, var(--cream) 50%, var(--champagne) 72%, #a8825f 100%);
+        --serif: 'Cormorant', 'Times New Roman', serif;
+        --sans: 'Pretendard Variable', Pretendard, -apple-system, system-ui, sans-serif;
+        --mono: 'IBM Plex Mono', ui-monospace, monospace;
       }
 
-      html,
-      body {
-        height: 100%;
-      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
 
       body {
+        min-height: 100svh;
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 24px 20px;
+        padding: max(20px, env(safe-area-inset-top)) 20px max(28px, env(safe-area-inset-bottom));
         background:
-          radial-gradient(120% 90% at 50% 0%, #41210b 0%, #2b1408 55%, #200d07 100%);
-        color: #fafafa;
-        font-family:
-          'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', sans-serif;
+          radial-gradient(130% 100% at 50% -10%, var(--cognac-3) 0%, var(--cognac-2) 48%, var(--cognac-0) 100%);
+        color: var(--canvas);
+        font-family: var(--sans);
         text-align: center;
+        overflow-x: hidden;
         -webkit-tap-highlight-color: transparent;
+      }
+
+      /* 필름 그레인 — 라운지의 어둑한 공기 */
+      body::after {
+        position: fixed;
+        inset: -50%;
+        z-index: 0;
+        content: '';
+        pointer-events: none;
+        opacity: 0.05;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
+        animation: grain 1.4s steps(3) infinite;
+      }
+
+      @keyframes grain {
+        0% { transform: translate(0, 0); }
+        33% { transform: translate(-4%, 3%); }
+        66% { transform: translate(3%, -4%); }
+        100% { transform: translate(0, 0); }
+      }
+
+      /* 떠다니는 금분 입자 */
+      .dust {
+        position: fixed;
+        z-index: 0;
+        width: 3px;
+        height: 3px;
+        border-radius: 50%;
+        background: var(--cream);
+        opacity: 0;
+        pointer-events: none;
+        animation: drift var(--dur, 9s) linear var(--delay, 0s) infinite;
+      }
+
+      @keyframes drift {
+        0% { opacity: 0; transform: translateY(12vh) scale(0.6); }
+        12% { opacity: var(--peak, 0.5); }
+        88% { opacity: var(--peak, 0.5); }
+        100% { opacity: 0; transform: translateY(-14vh) translateX(var(--sway, 12px)) scale(1); }
       }
 
       .stage {
         position: relative;
+        z-index: 1;
         display: flex;
         width: 100%;
-        max-width: 340px;
+        max-width: 350px;
         flex-direction: column;
         align-items: center;
-        gap: 24px;
+        gap: 26px;
       }
 
-      /* ── 반짝임 — 무대에 흩어진 ✦ ── */
-      .sparkle {
-        position: fixed;
-        color: #fff7d5;
+      /* ── 오프닝 시퀀스 — 순서대로 떠오른다 ── */
+      .rise {
         opacity: 0;
-        pointer-events: none;
-        user-select: none;
-        animation: twinkle 3.2s ease-in-out infinite;
+        transform: translateY(14px);
+        animation: rise 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+        animation-delay: var(--at, 0s);
       }
 
-      @keyframes twinkle {
-        0%,
-        100% {
-          opacity: 0;
-          transform: scale(0.6);
-        }
-        50% {
-          opacity: 0.85;
-          transform: scale(1);
-        }
+      @keyframes rise {
+        to { opacity: 1; transform: none; }
       }
 
-      .eyebrow {
-        color: #fff7d5;
-        font-size: 12px;
+      /* ── 모노그램 씰 — 선이 그려지며 시작 ── */
+      .crest { width: 58px; height: 58px; }
+
+      .crest circle,
+      .crest path {
+        fill: none;
+        stroke: var(--champagne);
+        stroke-width: 1.1;
+        stroke-dasharray: 300;
+        stroke-dashoffset: 300;
+        animation: draw 1.6s ease forwards;
+      }
+
+      .crest path { animation-delay: 0.45s; }
+
+      @keyframes draw { to { stroke-dashoffset: 0; } }
+
+      /* ── SIGNATURE: 출발 안내판 split-flap ── */
+      .board {
+        display: flex;
+        gap: 4px;
+        justify-content: center;
+        perspective: 300px;
+      }
+
+      .flap {
+        position: relative;
+        display: inline-flex;
+        width: 21px;
+        height: 30px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 3px;
+        background: linear-gradient(180deg, #33190b 0%, #241006 48%, #1c0c05 52%, #2a1307 100%);
+        box-shadow: inset 0 1px 0 rgba(255, 247, 213, 0.14), 0 2px 5px rgba(0, 0, 0, 0.5);
+        color: var(--cream);
+        font-family: var(--mono);
+        font-size: 15px;
         font-weight: 600;
-        letter-spacing: 0.24em;
-        line-height: 16px;
+        letter-spacing: 0;
+      }
+
+      .flap.space { background: none; box-shadow: none; width: 8px; }
+
+      /* 중앙 분할선 — split-flap의 정체성 */
+      .flap:not(.space)::after {
+        position: absolute;
+        inset: 50% 0 auto;
+        height: 1px;
+        content: '';
+        background: rgba(0, 0, 0, 0.55);
+      }
+
+      .flap .leaf { display: inline-block; }
+
+      .flap.flip .leaf { animation: flapflip 90ms linear; }
+
+      @keyframes flapflip {
+        0% { transform: rotateX(0); filter: brightness(1); }
+        49% { transform: rotateX(-88deg); filter: brightness(0.6); }
+        51% { transform: rotateX(88deg); filter: brightness(0.6); }
+        100% { transform: rotateX(0); filter: brightness(1); }
+      }
+
+      .board-label {
+        margin-top: 8px;
+        color: var(--brand);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.34em;
         text-transform: uppercase;
       }
 
+      /* ── 헤드라인 — 세리프의 의전 ── */
       .headline {
-        font-size: 26px;
-        font-weight: 700;
-        letter-spacing: 0.04em;
-        line-height: 34px;
+        font-family: var(--serif);
+        font-size: 34px;
+        font-style: italic;
+        font-weight: 500;
+        letter-spacing: 0.01em;
+        line-height: 1.18;
+        background: var(--foil);
+        background-size: 220% 100%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        /* rise(.rise)와 sheen을 한 선언에 — 나눠 두면 뒤 규칙이 앞을 지워
+           opacity 0에 갇힌다. */
+        animation:
+          rise 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) var(--at, 0s) forwards,
+          sheen 5.5s ease-in-out 1.4s infinite;
       }
 
-      .lede {
-        color: #e2c5b0;
-        font-size: 14px;
-        line-height: 22px;
+      @keyframes sheen {
+        0%, 100% { background-position: 0% 0; }
+        50% { background-position: 100% 0; }
       }
 
-      /* ── 티켓 플립 ── */
-      .flip {
-        width: 100%;
-        perspective: 1100px;
-      }
+      .lede { color: var(--champagne); font-size: 14px; line-height: 22px; }
+
+      /* ── 티켓 — 틸트·홀로그램·왁스 씰 개봉 ── */
+      .hand { width: 100%; perspective: 1200px; }
 
       .ticket {
         position: relative;
         width: 100%;
-        min-height: 300px;
+        min-height: 320px;
         border: 0;
-        border-radius: 14px;
+        border-radius: 16px;
         background: transparent;
         cursor: pointer;
         font: inherit;
+        text-align: center;
         transform-style: preserve-3d;
-        transition: transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+        transition: transform 1s cubic-bezier(0.16, 0.8, 0.24, 1);
+        will-change: transform;
       }
 
-      .stage.open .ticket {
-        transform: rotateY(180deg);
-        cursor: default;
-      }
+      .stage.open .ticket { transform: rotateY(180deg) !important; cursor: default; }
 
       .face {
         position: absolute;
@@ -120,252 +247,464 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 14px;
-        padding: 26px 22px;
-        border-radius: 14px;
+        gap: 13px;
+        overflow: hidden;
+        padding: 28px 22px;
+        border-radius: 16px;
         backface-visibility: hidden;
         -webkit-backface-visibility: hidden;
       }
 
-      /* 앞면 — 봉인된 뒷면. 어두운 코냑 카드 + 크림 엠블럼 */
-      .face.front {
-        border: 1px solid rgba(255, 247, 213, 0.35);
+      /* 앞면 — 봉인된 초대장 */
+      .front {
+        border: 1px solid rgba(226, 197, 176, 0.4);
         background:
-          radial-gradient(90% 70% at 50% 20%, #5a3621 0%, #41210b 70%);
-        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+          radial-gradient(95% 80% at 50% 12%, var(--cognac-4) 0%, var(--cognac-3) 58%, var(--cognac-2) 100%);
+        box-shadow: 0 24px 50px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 247, 213, 0.18);
       }
 
-      .seal {
-        display: flex;
-        width: 64px;
-        height: 64px;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid rgba(255, 247, 213, 0.5);
-        border-radius: 50%;
-        color: #fff7d5;
-        font-size: 26px;
+      /* 홀로그램 광택 — 틸트를 따라 흐른다 */
+      .front::before {
+        position: absolute;
+        inset: 0;
+        content: '';
+        pointer-events: none;
+        background: radial-gradient(
+          220px 180px at var(--gx, 50%) var(--gy, 30%),
+          rgba(255, 247, 213, 0.16),
+          transparent 70%
+        );
+        transition: opacity 0.3s;
+      }
+
+      /* 모서리 금선 프레임 */
+      .front::after {
+        position: absolute;
+        inset: 9px;
+        content: '';
+        pointer-events: none;
+        border: 1px solid rgba(226, 197, 176, 0.28);
+        border-radius: 10px;
+      }
+
+      .front-eyebrow {
+        color: var(--champagne);
+        font-family: var(--mono);
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.4em;
       }
 
       .front-title {
-        color: #fff7d5;
-        font-size: 15px;
-        font-weight: 700;
-        letter-spacing: 0.18em;
+        font-family: var(--serif);
+        font-size: 24px;
+        font-style: italic;
+        color: var(--cream);
+        line-height: 1.25;
       }
 
-      .front-hint {
-        color: #e2c5b0;
-        font-size: 13px;
-        line-height: 20px;
+      /* 왁스 씰 — 누르면 갈라진다 */
+      .seal {
+        position: relative;
+        display: flex;
+        width: 74px;
+        height: 74px;
+        align-items: center;
+        justify-content: center;
+        margin: 4px 0;
+        border-radius: 50%;
+        background:
+          radial-gradient(60% 60% at 35% 30%, #d98a57 0%, var(--brand) 45%, #8f5230 100%);
+        box-shadow:
+          0 4px 10px rgba(0, 0, 0, 0.5),
+          inset 0 2px 4px rgba(255, 247, 213, 0.35),
+          inset 0 -3px 6px rgba(0, 0, 0, 0.35);
+        color: var(--cream);
+        font-family: var(--serif);
+        font-size: 26px;
+        font-style: italic;
+        transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
       }
 
-      .tap-cue {
-        margin-top: 6px;
-        color: #fafafa;
-        font-size: 12px;
-        letter-spacing: 0.08em;
-        animation: pulse 1.6s ease-in-out infinite;
+      .ticket:hover .seal, .ticket:focus-visible .seal { transform: scale(1.06) rotate(-4deg); }
+
+      .stage.open .seal { animation: crack 0.5s ease forwards; }
+
+      @keyframes crack {
+        30% { transform: scale(1.14); }
+        100% { transform: scale(0.2) rotate(30deg); opacity: 0; }
       }
 
-      @keyframes pulse {
-        0%,
-        100% {
-          opacity: 0.55;
-        }
-        50% {
-          opacity: 1;
-        }
+      .front-hint { color: var(--champagne); font-size: 12.5px; line-height: 20px; }
+
+      .cue {
+        color: var(--cream);
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.22em;
+        animation: pulse 1.8s ease-in-out infinite;
       }
 
-      /* 뒷면 — 흰 티켓. 상단 브랜드 바 + 절취선 + 코드 스텁 */
-      .face.back {
-        color: #191919;
-        background: #fafafa;
-        border-top: 6px solid #c07346;
-        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+      @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+      /* 뒷면 — 퍼스트클래스 티켓 */
+      .back {
+        justify-content: flex-start;
+        border-top: 6px solid var(--brand);
+        background: var(--canvas);
+        box-shadow: 0 24px 50px rgba(0, 0, 0, 0.55);
+        color: var(--ink);
         transform: rotateY(180deg);
       }
 
-      .back-eyebrow {
-        color: #c07346;
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 0.22em;
+      /* 절취 노치 */
+      .back::before, .back::after {
+        position: absolute;
+        top: 63%;
+        width: 22px;
+        height: 22px;
+        content: '';
+        border-radius: 50%;
+        background: var(--cognac-1);
       }
 
-      .back-title {
-        font-size: 20px;
-        font-weight: 700;
-        line-height: 28px;
-      }
+      .back::before { left: -12px; }
+      .back::after { right: -12px; }
 
-      .back-copy {
-        color: #777;
-        font-size: 13px;
-        line-height: 20px;
-      }
-
-      .divider {
+      .back-route {
+        display: flex;
         width: 100%;
-        border: 0;
-        border-top: 1px dashed #bfbfbf;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 6px;
       }
 
-      .code-label {
-        color: #777;
-        font-size: 10px;
-        font-weight: 600;
-        letter-spacing: 0.16em;
+      .airport { display: flex; flex-direction: column; gap: 1px; }
+      .airport .code { font-family: var(--mono); font-size: 22px; font-weight: 600; letter-spacing: 0.04em; }
+      .airport .city { color: var(--muted); font-size: 10px; letter-spacing: 0.14em; }
+
+      .path { position: relative; flex: 1; height: 1px; margin: 0 12px; background: repeating-linear-gradient(90deg, #bfbfbf 0 5px, transparent 5px 10px); }
+
+      .plane {
+        position: absolute;
+        top: -7px;
+        left: 0;
+        font-size: 13px;
+        color: var(--brand);
+        animation: taxi 3.4s ease-in-out infinite;
       }
+
+      @keyframes taxi {
+        0%, 12% { left: 0; }
+        88%, 100% { left: calc(100% - 14px); }
+      }
+
+      .back-eyebrow { margin-top: 4px; color: var(--brand); font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 0.32em; }
+
+      .back-title { font-family: var(--serif); font-size: 23px; font-style: italic; line-height: 1.25; }
+
+      .grid {
+        display: grid;
+        width: 100%;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px 12px;
+        padding: 0 6px;
+        text-align: left;
+      }
+
+      .cell .k { color: var(--muted); font-size: 9px; font-weight: 600; letter-spacing: 0.18em; }
+      .cell .v { font-family: var(--mono); font-size: 13px; font-weight: 600; }
+      .cell.end { text-align: right; }
+
+      .tear-line { width: 100%; border: 0; border-top: 1px dashed #bfbfbf; margin: 2px 0; }
+
+      .code-label { color: var(--muted); font-size: 10px; font-weight: 600; letter-spacing: 0.2em; }
 
       .code {
+        min-height: 24px;
+        font-family: var(--mono);
         font-size: 17px;
-        font-weight: 700;
-        letter-spacing: 0.06em;
+        font-weight: 600;
+        letter-spacing: 0.08em;
         overflow-wrap: anywhere;
       }
 
-      /* ── 혜택 안내 · CTA — 열린 뒤에만 ── */
-      .after {
-        display: flex;
-        width: 100%;
-        flex-direction: column;
-        align-items: center;
-        gap: 14px;
-        opacity: 0;
+      .code .ch { display: inline-block; opacity: 0; transform: translateY(6px); animation: chin 0.32s ease forwards; }
+
+      @keyframes chin { to { opacity: 1; transform: none; } }
+
+      /* ── 개봉 파티클 ── */
+      .burst {
+        position: fixed;
+        z-index: 5;
+        color: var(--cream);
         pointer-events: none;
-        transform: translateY(8px);
-        transition: opacity 0.5s ease 0.55s, transform 0.5s ease 0.55s;
+        animation: burst 1.1s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
       }
 
-      .stage.open .after {
-        opacity: 1;
-        pointer-events: auto;
-        transform: none;
+      @keyframes burst {
+        0% { opacity: 1; transform: translate(0, 0) scale(0.5) rotate(0); }
+        100% { opacity: 0; transform: translate(var(--bx), var(--by)) scale(1.1) rotate(var(--br)); }
       }
+
+      /* ── 개봉 후 — 혜택·CTA 스태거 ── */
+      .after { display: flex; width: 100%; flex-direction: column; align-items: center; gap: 16px; }
+
+      .after > * {
+        opacity: 0;
+        transform: translateY(10px);
+        transition: opacity 0.55s ease, transform 0.55s ease;
+      }
+
+      .stage.open .after > * { opacity: 1; transform: none; }
+      .stage.open .after > :nth-child(1) { transition-delay: 0.65s; }
+      .stage.open .after > :nth-child(2) { transition-delay: 0.8s; }
+      .stage.open .after > :nth-child(3) { transition-delay: 0.95s; }
 
       .benefit {
-        color: #e2c5b0;
-        font-size: 13px;
-        line-height: 21px;
+        display: flex;
+        width: 100%;
+        align-items: center;
+        gap: 12px;
+        padding: 13px 16px;
+        border: 1px solid rgba(226, 197, 176, 0.3);
+        border-radius: 10px;
+        background: rgba(32, 13, 7, 0.55);
+        text-align: left;
       }
 
-      .benefit strong {
-        color: #fff7d5;
-        font-weight: 700;
-      }
+      .benefit .ico { flex: none; color: var(--champagne); font-size: 16px; }
+      .benefit p { color: var(--champagne); font-size: 12.5px; line-height: 19px; }
+      .benefit strong { color: var(--cream); font-weight: 700; }
 
       .cta {
+        position: relative;
         display: inline-flex;
         width: 100%;
-        height: 50px;
+        height: 52px;
         align-items: center;
         justify-content: center;
-        gap: 8px;
-        border-radius: 8px;
-        background: #c07346;
-        color: #fafafa;
+        gap: 9px;
+        overflow: hidden;
+        border-radius: 9px;
+        background: var(--brand);
+        color: var(--canvas);
         font-size: 14px;
-        font-weight: 600;
+        font-weight: 700;
+        letter-spacing: 0.02em;
         text-decoration: none;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
       }
 
-      .note {
-        color: #807066;
-        font-size: 11px;
-        line-height: 18px;
+      .cta:hover, .cta:focus-visible { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(192, 115, 70, 0.35); }
+      .cta:active { transform: translateY(0); }
+
+      /* 골드 시머 스윕 */
+      .cta::before {
+        position: absolute;
+        inset: 0;
+        content: '';
+        background: linear-gradient(115deg, transparent 30%, rgba(255, 247, 213, 0.35) 50%, transparent 70%);
+        transform: translateX(-120%);
+        animation: shimmer 3.2s ease-in-out 1.6s infinite;
       }
+
+      @keyframes shimmer {
+        0% { transform: translateX(-120%); }
+        45%, 100% { transform: translateX(120%); }
+      }
+
+      .cta .jet { display: inline-block; transition: transform 0.35s ease; }
+      .cta:hover .jet { transform: translate(6px, -4px) rotate(-8deg); }
+
+      .note { color: #807066; font-size: 11px; line-height: 18px; }
+
+      a:focus-visible, button:focus-visible { outline: 2px solid var(--cream); outline-offset: 3px; }
 
       @media (prefers-reduced-motion: reduce) {
-        .ticket,
-        .after {
-          transition: none;
-        }
-
-        .sparkle,
-        .tap-cue {
-          animation: none;
-        }
-
-        .sparkle {
-          opacity: 0.5;
-        }
+        *, *::before, *::after { animation: none !important; transition: none !important; }
+        .rise, .after > * { opacity: 1; transform: none; }
+        .crest circle, .crest path { stroke-dashoffset: 0; }
+        .stage.open .seal { opacity: 0; }
+        .plane { left: calc(50% - 7px); }
       }
     </style>
   </head>
   <body>
     <main class="stage" id="stage">
-      <header>
-        <p class="eyebrow">Hidden Boarding</p>
-        <h1 class="headline">숨은 탑승권이 도착했습니다</h1>
-        <p class="lede">MCM HAUS의 히든 이벤트에 초대되셨어요</p>
+      <header class="rise" style="--at: 0.05s">
+        <svg class="crest" viewBox="0 0 58 58" aria-hidden="true">
+          <circle cx="29" cy="29" r="27" />
+          <path d="M16 38 L23 20 L29 33 L35 20 L42 38" />
+        </svg>
       </header>
 
-      <div class="flip">
+      <div class="rise" style="--at: 0.25s">
+        <div class="board" id="board" aria-label="HIDDEN CALL"></div>
+        <p class="board-label">MCM Air · First Class</p>
+      </div>
+
+      <h1 class="headline rise" style="--at: 0.45s">숨은 탑승권이<br />도착했습니다</h1>
+      <p class="lede rise" style="--at: 0.6s">티켓의 QR을 따라 이곳까지 오셨군요.<br />오늘의 숨겨진 좌석은 단 한 번만 열립니다.</p>
+
+      <div class="hand rise" style="--at: 0.78s">
         <button class="ticket" id="ticket" type="button" aria-expanded="false">
-          <span class="face front" aria-hidden="false">
-            <span class="seal" aria-hidden="true">✦</span>
-            <span class="front-title">MCM BOARDING PASS</span>
-            <span class="front-hint">티켓의 QR을 따라 이곳까지 오셨군요.<br />숨겨진 좌석은 단 한 번만 열립니다.</span>
-            <span class="tap-cue">눌러서 탑승권 열기</span>
+          <span class="face front">
+            <span class="front-eyebrow">SEALED INVITATION</span>
+            <span class="front-title">Hidden<br />First Class</span>
+            <span class="seal" aria-hidden="true">M</span>
+            <span class="front-hint">봉인을 눌러 좌석을 확인하세요</span>
+            <span class="cue">TAP TO BREAK SEAL</span>
           </span>
 
-          <span class="face back" aria-hidden="true">
+          <span class="face back">
+            <span class="back-route" aria-hidden="true">
+              <span class="airport"><span class="code">ICN</span><span class="city">SEOUL</span></span>
+              <span class="path"><span class="plane">✈</span></span>
+              <span class="airport" style="text-align: right"><span class="code">MUC</span><span class="city">MÜNCHEN</span></span>
+            </span>
             <span class="back-eyebrow">HIDDEN PASSENGER</span>
             <span class="back-title">축하합니다,<br />히든 탑승객이십니다</span>
-            <span class="back-copy">이 화면이 오늘의 숨은 좌석 티켓입니다</span>
-            <hr class="divider" aria-hidden="true" />
+            <span class="grid" aria-hidden="true">
+              <span class="cell"><span class="k">CLASS</span><br /><span class="v">FIRST</span></span>
+              <span class="cell end"><span class="k">GATE</span><br /><span class="v">HAUS 1</span></span>
+              <span class="cell"><span class="k">FLIGHT</span><br /><span class="v">MCM 1976</span></span>
+              <span class="cell end"><span class="k">SEAT</span><br /><span class="v">HIDDEN</span></span>
+            </span>
+            <hr class="tear-line" aria-hidden="true" />
             <span class="code-label">PASS CODE</span>
-            <span class="code" id="code">HIDDEN-GUEST</span>
+            <span class="code" id="code" aria-live="polite"></span>
           </span>
         </button>
       </div>
 
       <div class="after" id="after">
         <!-- 혜택 문구는 팀 행사 운영에 맞게 자유롭게 바꾸세요. -->
-        <p class="benefit">
-          매장 데스크에서 이 화면을 보여 주시면<br /><strong>히든 탑승객 웰컴 기프트</strong>를 드립니다
-        </p>
-        <a class="cta" id="cta" href="https://boardingpass-seven.vercel.app/boarding-pass">
+        <div class="benefit">
+          <span class="ico" aria-hidden="true">✦</span>
+          <p>매장 데스크에서 이 화면을 보여 주시면 <strong>히든 탑승객 웰컴 기프트</strong>를 드립니다</p>
+        </div>
+        <a class="cta" href="https://boardingpass-seven.vercel.app/boarding-pass">
           <span>MCM 비행 이어가기</span>
-          <span aria-hidden="true">✈</span>
+          <span class="jet" aria-hidden="true">✈</span>
         </a>
         <p class="note">이 행사는 MCM HAUS 매장 기반으로 진행됩니다</p>
       </div>
     </main>
 
     <script>
-      // 티켓 QR이 실어 보낸 패스 코드(?pass=)를 좌석 티켓에 박는다.
-      // 없이 열어도 HIDDEN-GUEST로 동작한다 — URL만 공유받은 손님도 막지 않는다.
-      const pass = new URLSearchParams(location.search).get('pass');
-      if (pass && pass.trim()) {
-        document.getElementById('code').textContent = pass.trim();
+      const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      /* ── 티켓 QR이 실어 보낸 패스 코드(?pass=) ── */
+      const passParam = new URLSearchParams(location.search).get('pass');
+      const passCode = (passParam && passParam.trim()) || 'HIDDEN-GUEST';
+
+      /* ── split-flap 안내판 — 글자가 한 칸씩 착착 도착한다 ── */
+      const TARGET = 'HIDDEN CALL';
+      const POOL = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      const board = document.getElementById('board');
+      const flaps = [...TARGET].map((ch) => {
+        const cell = document.createElement('span');
+        cell.className = 'flap' + (ch === ' ' ? ' space' : '');
+        const leaf = document.createElement('span');
+        leaf.className = 'leaf';
+        leaf.textContent = ch === ' ' ? '' : '·';
+        cell.appendChild(leaf);
+        board.appendChild(cell);
+        return { cell, leaf, target: ch };
+      });
+
+      function spinFlap({ cell, leaf, target }, order) {
+        if (target === ' ') return;
+        if (reduced) { leaf.textContent = target; return; }
+        let ticks = 5 + order * 2 + Math.floor(Math.random() * 4);
+        const timer = setInterval(() => {
+          leaf.textContent = ticks > 1 ? POOL[Math.floor(Math.random() * POOL.length)] : target;
+          cell.classList.remove('flip');
+          void cell.offsetWidth; /* 애니메이션 재시작 */
+          cell.classList.add('flip');
+          if (--ticks <= 0) clearInterval(timer);
+        }, 90);
       }
 
-      // 무대 반짝임 — 위치·박자를 조금씩 다르게 흩는다.
-      const SPARKLES = 14;
-      for (let i = 0; i < SPARKLES; i += 1) {
-        const s = document.createElement('span');
-        s.className = 'sparkle';
-        s.textContent = '✦';
-        s.style.left = (5 + Math.random() * 90) + 'vw';
-        s.style.top = (4 + Math.random() * 90) + 'vh';
-        s.style.fontSize = (8 + Math.random() * 10) + 'px';
-        s.style.animationDelay = (Math.random() * 3) + 's';
-        s.setAttribute('aria-hidden', 'true');
-        document.body.appendChild(s);
+      setTimeout(() => flaps.forEach((f, i) => spinFlap(f, i)), reduced ? 0 : 500);
+
+      /* ── 금분 입자 ── */
+      if (!reduced) {
+        for (let i = 0; i < 16; i += 1) {
+          const d = document.createElement('span');
+          d.className = 'dust';
+          d.style.left = 3 + Math.random() * 94 + 'vw';
+          d.style.top = 30 + Math.random() * 65 + 'vh';
+          d.style.setProperty('--dur', 7 + Math.random() * 7 + 's');
+          d.style.setProperty('--delay', Math.random() * 8 + 's');
+          d.style.setProperty('--peak', (0.2 + Math.random() * 0.4).toFixed(2));
+          d.style.setProperty('--sway', (Math.random() * 40 - 20).toFixed(0) + 'px');
+          d.setAttribute('aria-hidden', 'true');
+          document.body.appendChild(d);
+        }
       }
 
-      // 한 번 열리면 닫히지 않는다 — "단 한 번 열리는 좌석"의 연출.
+      /* ── 티켓 3D 틸트 + 홀로그램 추적 ── */
       const stage = document.getElementById('stage');
       const ticket = document.getElementById('ticket');
-      ticket.addEventListener('click', () => {
+
+      ticket.addEventListener('pointermove', (e) => {
+        if (reduced || stage.classList.contains('open')) return;
+        const r = ticket.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width;
+        const py = (e.clientY - r.top) / r.height;
+        ticket.style.transform =
+          'rotateY(' + ((px - 0.5) * 14).toFixed(2) + 'deg) rotateX(' + ((0.5 - py) * 12).toFixed(2) + 'deg)';
+        ticket.style.setProperty('--gx', (px * 100).toFixed(1) + '%');
+        ticket.style.setProperty('--gy', (py * 100).toFixed(1) + '%');
+      });
+
+      ticket.addEventListener('pointerleave', () => {
+        if (!stage.classList.contains('open')) ticket.style.transform = '';
+      });
+
+      /* ── 개봉 — 씰 크랙 → 플립 → 파티클 → 코드 롤업 ── */
+      function typeCode() {
+        const box = document.getElementById('code');
+        box.textContent = '';
+        [...passCode].forEach((ch, i) => {
+          const s = document.createElement('span');
+          s.className = 'ch';
+          s.textContent = ch;
+          s.style.animationDelay = reduced ? '0s' : 0.75 + i * 0.055 + 's';
+          box.appendChild(s);
+        });
+      }
+
+      function burstFrom(x, y) {
+        if (reduced) return;
+        for (let i = 0; i < 26; i += 1) {
+          const p = document.createElement('span');
+          p.className = 'burst';
+          p.textContent = Math.random() > 0.45 ? '✦' : '·';
+          p.style.left = x + 'px';
+          p.style.top = y + 'px';
+          p.style.fontSize = 8 + Math.random() * 12 + 'px';
+          const angle = Math.random() * Math.PI * 2;
+          const dist = 60 + Math.random() * 130;
+          p.style.setProperty('--bx', Math.cos(angle) * dist + 'px');
+          p.style.setProperty('--by', Math.sin(angle) * dist - 40 + 'px');
+          p.style.setProperty('--br', (Math.random() * 240 - 120).toFixed(0) + 'deg');
+          p.setAttribute('aria-hidden', 'true');
+          document.body.appendChild(p);
+          setTimeout(() => p.remove(), 1200);
+        }
+      }
+
+      ticket.addEventListener('click', (e) => {
         if (stage.classList.contains('open')) return;
+        ticket.style.transform = '';
         stage.classList.add('open');
         ticket.setAttribute('aria-expanded', 'true');
-        ticket.querySelector('.front').setAttribute('aria-hidden', 'true');
-        ticket.querySelector('.back').setAttribute('aria-hidden', 'false');
+        const r = ticket.getBoundingClientRect();
+        burstFrom(e.clientX || r.left + r.width / 2, e.clientY || r.top + r.height / 2);
+        typeCode();
       });
     </script>
   </body>
