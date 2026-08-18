@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#200d07" />
+    <meta name="description" content="MCM Boarding Pass 히든 탑승객 이벤트" />
+    <title>MCM HIDDEN BOARDING</title>
+    <style>
+      /* MCM Boarding Pass 무대의 색만 쓴다 — 새 색을 만들지 않는다.
+         #200d07/#41210b 무대, #fff7d5 크림, #c07346 브랜드 브라운,
+         #e2c5b0 헤더 타이틀, #fafafa 캔버스, #191919 잉크 */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px 20px;
+        background:
+          radial-gradient(120% 90% at 50% 0%, #41210b 0%, #2b1408 55%, #200d07 100%);
+        color: #fafafa;
+        font-family:
+          'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', sans-serif;
+        text-align: center;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .stage {
+        position: relative;
+        display: flex;
+        width: 100%;
+        max-width: 340px;
+        flex-direction: column;
+        align-items: center;
+        gap: 24px;
+      }
+
+      /* ── 반짝임 — 무대에 흩어진 ✦ ── */
+      .sparkle {
+        position: fixed;
+        color: #fff7d5;
+        opacity: 0;
+        pointer-events: none;
+        user-select: none;
+        animation: twinkle 3.2s ease-in-out infinite;
+      }
+
+      @keyframes twinkle {
+        0%,
+        100% {
+          opacity: 0;
+          transform: scale(0.6);
+        }
+        50% {
+          opacity: 0.85;
+          transform: scale(1);
+        }
+      }
+
+      .eyebrow {
+        color: #fff7d5;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.24em;
+        line-height: 16px;
+        text-transform: uppercase;
+      }
+
+      .headline {
+        font-size: 26px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        line-height: 34px;
+      }
+
+      .lede {
+        color: #e2c5b0;
+        font-size: 14px;
+        line-height: 22px;
+      }
+
+      /* ── 티켓 플립 ── */
+      .flip {
+        width: 100%;
+        perspective: 1100px;
+      }
+
+      .ticket {
+        position: relative;
+        width: 100%;
+        min-height: 300px;
+        border: 0;
+        border-radius: 14px;
+        background: transparent;
+        cursor: pointer;
+        font: inherit;
+        transform-style: preserve-3d;
+        transition: transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+      }
+
+      .stage.open .ticket {
+        transform: rotateY(180deg);
+        cursor: default;
+      }
+
+      .face {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        padding: 26px 22px;
+        border-radius: 14px;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+      }
+
+      /* 앞면 — 봉인된 뒷면. 어두운 코냑 카드 + 크림 엠블럼 */
+      .face.front {
+        border: 1px solid rgba(255, 247, 213, 0.35);
+        background:
+          radial-gradient(90% 70% at 50% 20%, #5a3621 0%, #41210b 70%);
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+      }
+
+      .seal {
+        display: flex;
+        width: 64px;
+        height: 64px;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(255, 247, 213, 0.5);
+        border-radius: 50%;
+        color: #fff7d5;
+        font-size: 26px;
+      }
+
+      .front-title {
+        color: #fff7d5;
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+      }
+
+      .front-hint {
+        color: #e2c5b0;
+        font-size: 13px;
+        line-height: 20px;
+      }
+
+      .tap-cue {
+        margin-top: 6px;
+        color: #fafafa;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        animation: pulse 1.6s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 0.55;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      /* 뒷면 — 흰 티켓. 상단 브랜드 바 + 절취선 + 코드 스텁 */
+      .face.back {
+        color: #191919;
+        background: #fafafa;
+        border-top: 6px solid #c07346;
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+        transform: rotateY(180deg);
+      }
+
+      .back-eyebrow {
+        color: #c07346;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.22em;
+      }
+
+      .back-title {
+        font-size: 20px;
+        font-weight: 700;
+        line-height: 28px;
+      }
+
+      .back-copy {
+        color: #777;
+        font-size: 13px;
+        line-height: 20px;
+      }
+
+      .divider {
+        width: 100%;
+        border: 0;
+        border-top: 1px dashed #bfbfbf;
+      }
+
+      .code-label {
+        color: #777;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.16em;
+      }
+
+      .code {
+        font-size: 17px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        overflow-wrap: anywhere;
+      }
+
+      /* ── 혜택 안내 · CTA — 열린 뒤에만 ── */
+      .after {
+        display: flex;
+        width: 100%;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(8px);
+        transition: opacity 0.5s ease 0.55s, transform 0.5s ease 0.55s;
+      }
+
+      .stage.open .after {
+        opacity: 1;
+        pointer-events: auto;
+        transform: none;
+      }
+
+      .benefit {
+        color: #e2c5b0;
+        font-size: 13px;
+        line-height: 21px;
+      }
+
+      .benefit strong {
+        color: #fff7d5;
+        font-weight: 700;
+      }
+
+      .cta {
+        display: inline-flex;
+        width: 100%;
+        height: 50px;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border-radius: 8px;
+        background: #c07346;
+        color: #fafafa;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+      }
+
+      .note {
+        color: #807066;
+        font-size: 11px;
+        line-height: 18px;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .ticket,
+        .after {
+          transition: none;
+        }
+
+        .sparkle,
+        .tap-cue {
+          animation: none;
+        }
+
+        .sparkle {
+          opacity: 0.5;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="stage" id="stage">
+      <header>
+        <p class="eyebrow">Hidden Boarding</p>
+        <h1 class="headline">숨은 탑승권이 도착했습니다</h1>
+        <p class="lede">MCM HAUS의 히든 이벤트에 초대되셨어요</p>
+      </header>
+
+      <div class="flip">
+        <button class="ticket" id="ticket" type="button" aria-expanded="false">
+          <span class="face front" aria-hidden="false">
+            <span class="seal" aria-hidden="true">✦</span>
+            <span class="front-title">MCM BOARDING PASS</span>
+            <span class="front-hint">티켓의 QR을 따라 이곳까지 오셨군요.<br />숨겨진 좌석은 단 한 번만 열립니다.</span>
+            <span class="tap-cue">눌러서 탑승권 열기</span>
+          </span>
+
+          <span class="face back" aria-hidden="true">
+            <span class="back-eyebrow">HIDDEN PASSENGER</span>
+            <span class="back-title">축하합니다,<br />히든 탑승객이십니다</span>
+            <span class="back-copy">이 화면이 오늘의 숨은 좌석 티켓입니다</span>
+            <hr class="divider" aria-hidden="true" />
+            <span class="code-label">PASS CODE</span>
+            <span class="code" id="code">HIDDEN-GUEST</span>
+          </span>
+        </button>
+      </div>
+
+      <div class="after" id="after">
+        <!-- 혜택 문구는 팀 행사 운영에 맞게 자유롭게 바꾸세요. -->
+        <p class="benefit">
+          매장 데스크에서 이 화면을 보여 주시면<br /><strong>히든 탑승객 웰컴 기프트</strong>를 드립니다
+        </p>
+        <a class="cta" id="cta" href="https://boardingpass-seven.vercel.app/boarding-pass">
+          <span>MCM 비행 이어가기</span>
+          <span aria-hidden="true">✈</span>
+        </a>
+        <p class="note">이 행사는 MCM HAUS 매장 기반으로 진행됩니다</p>
+      </div>
+    </main>
+
+    <script>
+      // 티켓 QR이 실어 보낸 패스 코드(?pass=)를 좌석 티켓에 박는다.
+      // 없이 열어도 HIDDEN-GUEST로 동작한다 — URL만 공유받은 손님도 막지 않는다.
+      const pass = new URLSearchParams(location.search).get('pass');
+      if (pass && pass.trim()) {
+        document.getElementById('code').textContent = pass.trim();
+      }
+
+      // 무대 반짝임 — 위치·박자를 조금씩 다르게 흩는다.
+      const SPARKLES = 14;
+      for (let i = 0; i < SPARKLES; i += 1) {
+        const s = document.createElement('span');
+        s.className = 'sparkle';
+        s.textContent = '✦';
+        s.style.left = (5 + Math.random() * 90) + 'vw';
+        s.style.top = (4 + Math.random() * 90) + 'vh';
+        s.style.fontSize = (8 + Math.random() * 10) + 'px';
+        s.style.animationDelay = (Math.random() * 3) + 's';
+        s.setAttribute('aria-hidden', 'true');
+        document.body.appendChild(s);
+      }
+
+      // 한 번 열리면 닫히지 않는다 — "단 한 번 열리는 좌석"의 연출.
+      const stage = document.getElementById('stage');
+      const ticket = document.getElementById('ticket');
+      ticket.addEventListener('click', () => {
+        if (stage.classList.contains('open')) return;
+        stage.classList.add('open');
+        ticket.setAttribute('aria-expanded', 'true');
+        ticket.querySelector('.front').setAttribute('aria-hidden', 'true');
+        ticket.querySelector('.back').setAttribute('aria-hidden', 'false');
+      });
+    </script>
+  </body>
+</html>
